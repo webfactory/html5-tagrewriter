@@ -1,0 +1,41 @@
+{
+    "name": "webfactory/html5-tagrewriter",
+    "description": "A small library that uses a handler pattern to transform HTML documents, based on the PHP 8.4+ HTML5 parser and DOM extension",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "html5",
+        "dom",
+        "rewriter",
+        "transformer",
+        "parser"
+    ],
+    "authors": [
+        {
+            "name": "webfactory GmbH",
+            "email": "info@webfactory.de",
+            "homepage": "https://www.webfactory.de"
+        }
+    ],
+    "homepage": "https://github.com/webfactory/html5-tagrewriter",
+    "require": {
+        "php": ">= 8.4",
+        "ext-dom": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webfactory\\Html5TagRewriter\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webfactory\\Html5TagRewriter\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
