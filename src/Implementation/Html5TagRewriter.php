@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webfactory\Html5TagRewriter\Implementation;
 
 use Dom\Document;
+use Dom\Element;
 use Dom\HTMLDocument;
 use Dom\Node;
 use Dom\XPath;
@@ -43,13 +44,16 @@ final class Html5TagRewriter implements TagRewriter
         $temp = $document->createElement('temp');
         $temp->innerHTML = $html5Fragment;
 
-        while ($temp->firstChild) {
+        while ($temp->firstChild instanceof Node) {
             $container->appendChild($temp->firstChild);
         }
 
         $this->applyHandlers($document, $container);
 
-        return $this->cleanup($container->innerHTML);
+        /** @var string */
+        $innerHTML = $container->innerHTML;
+
+        return $this->cleanup($innerHTML);
     }
 
     private function applyHandlers(Document $document, Node $context): void
@@ -60,6 +64,7 @@ final class Html5TagRewriter implements TagRewriter
         $xpath->registerNamespace('mathml', 'http://www.w3.org/1998/Math/MathML');
 
         foreach ($this->rewriteHandlers as $handler) {
+            /** @var iterable<Element> */
             $elements = $xpath->query($handler->appliesTo(), $context);
             foreach ($elements as $element) {
                 $handler->match($element);
