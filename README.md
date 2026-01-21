@@ -30,15 +30,14 @@ $result = $rewriter->processFragment($fragment);
 
 ### Creating a Handler
 
-Implement the `RewriteHandler` interface to create custom tag transformations:
+Implement the `RewriteHandler` interface or extend `BaseRewriteHandler` to create custom tag transformations.
+The `BaseRewriteHandler` provides empty default implementations, so you only need to override the methods you need:
 
 ```php
 use Dom\Element;
-use Dom\Document;
-use Dom\XPath;
-use Webfactory\Html5TagRewriter\RewriteHandler;
+use Webfactory\Html5TagRewriter\Handler\BaseRewriteHandler;
 
-class ExternalLinkHandler implements RewriteHandler
+class ExternalLinkHandler extends BaseRewriteHandler
 {
     public function appliesTo(): string
     {
@@ -49,18 +48,11 @@ class ExternalLinkHandler implements RewriteHandler
 
     public function match(Element $element): void
     {
-        // Called for each matching element
         $href = $element->getAttribute('href');
         if (str_starts_with($href, 'http')) {
             $element->setAttribute('target', '_blank');
             $element->setAttribute('rel', 'noopener');
         }
-    }
-
-    public function afterMatches(Document $document, XPath $xpath): void
-    {
-        // Called after all matches are processed
-        // Useful for batch operations
     }
 }
 ```

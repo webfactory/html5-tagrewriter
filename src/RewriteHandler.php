@@ -7,34 +7,60 @@ use Dom\Element;
 use Dom\XPath;
 
 /**
- * Interface für einen Handler, der eine bestimmte Art von Tags
- * umschreibt.
+ * Interface for handlers that transform specific HTML elements.
+ *
+ * Handlers are registered with a TagRewriter and are invoked during document processing.
+ * The processing flow for each handler is:
+ *   1. appliesTo() is called to get the XPath expression
+ *   2. match() is called for each element matching the XPath
+ *   3. afterMatches() is called once after all matches have been processed
  */
 interface RewriteHandler
 {
     /**
-     * Gibt an, welche Tags der Handler verarbeiten möchte. Der XPath-Ausdruck muss
-     * für HTML5-Tags das Namespace-Prefix "html" verwenden. Zum Beispiel trifft
-     * '//html:a' alle <a>-Tags.
+     * Returns an XPath expression that selects the elements this handler should process.
      *
-     * @return string Ein XPath-Ausdruck, der die zu verarbeitenden Tags qualifiziert.
+     * The following namespace prefixes are pre-registered and must be used:
+     *   - 'html:' for HTML5 elements (e.g., '//html:a' for all <a> tags)
+     *   - 'svg:' for SVG elements (e.g., '//svg:circle')
+     *   - 'mathml:' for MathML elements (e.g., '//mathml:mrow')
+     *
+     * Examples:
+     *   - '//html:a[@href]' - all <a> elements with an href attribute
+     *   - '//html:img[not(@alt)]' - all <img> elements without an alt attribute
+     *   - '//html:div[@class="content"]//html:p' - all <p> elements inside <div class="content">
+     *
+     * @return string An XPath expression selecting the elements to process
      */
     public function appliesTo(): string;
 
     /**
-     * Verarbeitet ein passendes DOM-Element.
+     * Called for each element that matches the XPath expression from appliesTo().
      *
-     * @param Element $element Ein DOM-Node, der vom Handler bearbeitet werden kann.
+     * Use this method to inspect or modify the element. Common operations include:
+     *   - Reading/modifying attributes: $element->getAttribute(), $element->setAttribute()
+     *   - Modifying content: $element->innerHTML, $element->textContent
+     *   - Removing the element: $element->parentNode->removeChild($element)
+     *   - Adding child elements: $element->appendChild()
+     *
+     * If you need to perform batch operations after all elements have been visited,
+     * collect the elements here and process them in afterMatches().
+     *
+     * @param Element $element The DOM element that matched the XPath expression
      */
     public function match(Element $element): void;
 
     /**
-     * Schablonenmethode. Teilt dem Handler mit, dass alle Treffer gefunden und an
-     * match() übergeben wurden.
-     * Der Handler kann in match() die DOM-Nodes sammeln und in dieser Methode im
-     * batch verarbeiten.
+     * Called once after all matching elements have been passed to match().
      *
-     * @return void
+     * Use this method for operations that require knowledge of all matched elements,
+     * or that need to modify the document structure in ways that would interfere
+     * with the XPath iteration (e.g., moving elements to a different location).
+     *
+     * This method is called even if no elements matched the XPath expression.
+     *
+     * @param Document $document The DOM document being processed
+     * @param XPath $xpath The XPath instance with pre-registered namespaces, useful for additional queries
      */
-    public function afterMatches(Document $document, XPath $xpath);
+    public function afterMatches(Document $document, XPath $xpath): void;
 }
