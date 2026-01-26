@@ -48,6 +48,7 @@ final class Html5TagRewriter implements TagRewriter
          * placed directly after the `<body>` tag.
          */
         $document = HTMLDocument::createFromString('', overrideEncoding: 'utf-8');
+        /** @var \Dom\HTMLElement $container */
         $container = $document->body;
         $container->innerHTML = $html5Fragment;
 
