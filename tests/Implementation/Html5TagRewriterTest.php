@@ -184,16 +184,16 @@ class Html5TagRewriterTest extends TestCase
             "<pre>  Line 1\n  Line 2\n  Line 3</pre>",
         ];
 
-        yield 'ESI tag' => [
-            '<esi:include src="url?foo=bar&amp;bar=baz" />',
+        yield 'ESI tag kept literally, since it may be processed as raw text, not under HTML rules' => [
+            '<esi:include src="url?foo=bar&bar=baz" />',
         ];
 
-        yield 'ESI tags in context' => [
+        yield 'ESI multiple ESI tags with context' => [
             '<div><p>test</p>
                 <hr>
-                <esi:include src="/_fragment?_hash=123&amp;foo=bar" />
+                <esi:include src="/_fragment?_hash=123&foo=bar" />
                 <hr>
-                <esi:include src="/_fragment?_hash=456" />
+                <esi:include src="/_fragment?_hash=456&bar=baz" />
             </div>'
         ];
     }
@@ -211,7 +211,7 @@ class Html5TagRewriterTest extends TestCase
     {
         yield 'empty ESI include tag' => [
             '<esi:include src="url?foo=bar&amp;bar=baz"/>',
-            '<esi:include src="url?foo=bar&amp;bar=baz" />',
+            '<esi:include src="url?foo=bar&amp;bar=baz"/>',
         ];
 
         yield 'qouted entities are replaced' => [
