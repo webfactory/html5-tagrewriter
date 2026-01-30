@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Webfactory\Html5TagRewriter\Implementation;
 
 use Dom\Document;
-use Dom\Element;
 use Dom\HTMLDocument;
 use Dom\Node;
 use Dom\XPath;
@@ -27,11 +26,13 @@ final class Html5TagRewriter implements TagRewriter
     #[Override]
     public function process(string $html5): string
     {
-        $document = HTMLDocument::createFromString($this->convertEsiSelfClosingTagsToEmptyElements($html5), LIBXML_NOERROR);
+        $esiProcessor = new EsiTagProcessor();
+
+        $document = HTMLDocument::createFromString($esiProcessor->preProcess($html5), LIBXML_NOERROR);
 
         $this->applyHandlers($document, $document);
 
-        return $this->convertEsiEmptyElementsToSelfClosingTags($document->saveHtml());
+        return $esiProcessor->postProcess($document->saveHtml());
     }
 
     #[Override]
@@ -47,15 +48,17 @@ final class Html5TagRewriter implements TagRewriter
          * handling of fragments to such inputs that can equally be considered to be
          * placed directly after the `<body>` tag.
          */
+        $esiProcessor = new EsiTagProcessor();
+
         $document = HTMLDocument::createFromString('', overrideEncoding: 'utf-8');
         $container = $document->body;
         assert($container !== null);
 
-        $container->innerHTML = $this->convertEsiSelfClosingTagsToEmptyElements($html5Fragment);
+        $container->innerHTML = $esiProcessor->preProcess($html5Fragment);
 
         $this->applyHandlers($document, $container);
 
-        return $this->convertEsiEmptyElementsToSelfClosingTags($container->innerHTML);
+        return $esiProcessor->postProcess($container->innerHTML);
     }
 
     private function applyHandlers(Document $document, Node $context): void
@@ -75,13 +78,4 @@ final class Html5TagRewriter implements TagRewriter
         }
     }
 
-    private function convertEsiSelfClosingTagsToEmptyElements(string $html): string
-    {
-        return preg_replace('#(<esi:([a-z]+)(?:[^>]*))/>#i', '$1></esi:\\2>', $html) ?? $html;
-    }
-
-    private function convertEsiEmptyElementsToSelfClosingTags(string $html): string
-    {
-        return preg_replace('#(<esi:([a-z]+)(?:[^>]*))></esi:\\2>#i', '$1 />', $html) ?? $html;
-    }
 }

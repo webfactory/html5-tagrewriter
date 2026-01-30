@@ -89,15 +89,25 @@ The following namespaces are pre-registered for XPath queries:
 
 ### ESI Tag Support
 
-The library handles Edge Side Includes (ESI) tags, converting empty ESI tags to self-closing format:
+The library preserves Edge Side Includes (ESI) tags verbatim during HTML5 processing. ESI tags present multiple challenges:
 
-```php
-// Input
-'<esi:include src="url"></esi:include>'
+1. **Self-closing syntax**: Tags like `<esi:include src="..." />` don't exist in HTML5
+2. **Arbitrary interleaving**: ESI tags can span across HTML element boundaries
+3. **Attribute encoding**: Characters like `&` must not become `&amp;`
 
-// Output
-'<esi:include src="url" />'
-```
+The [ESI Language Specification 1.0](https://www.w3.org/TR/esi-lang/) describes ESI as "XML-based" (Section 1), but also states that documents containing ESI markup are not valid. From Section 1.1:
+
+> the markup that is emitted by the origin server is not valid; it contains interposed elements from the ESI namespace
+
+ESI elements can be arbitrarily interleaved with the underlying content, which does not even need to be HTML. The standard makes no statements about whether HTML entities must be applied. Since XML parsing is not feasible for such documents, assuming XML encoding rules is not warranted.
+
+This library wraps every ESI tag (opening, closing, or self-closing) in an HTML comment using the ESI comment syntax defined in Section 3.7 of the ESI specification (`<!--esi ... -->`). This hides the tags from the HTML5 parser while preserving them verbatim.
+
+> [!IMPORTANT]
+> During processing, ESI tags appear as Comment nodes in the DOM. If RewriteHandler
+> transformations move or delete these comment nodes, the final result may not
+> match expectations.
+
 ## Credits, Copyright and License
 
 This library is based on internal work that we have been using at webfactory GmbH, Bonn, at least
