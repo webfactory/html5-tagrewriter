@@ -10,6 +10,8 @@ Examples:
 - Find all `<img>` in a page that have a `data-credits` attribute, and place all credits information in a section in the page footer
 - Find all headings within the `<main>` section of the page, generate a table of contents with anchor links and place it at the beginning of the page
 
+For the Symfony integration, see https://github.com/webfactory/WebfactoryHtml5TagRewriterBundle.
+
 ## Usage
 
 ### Basic Usage
