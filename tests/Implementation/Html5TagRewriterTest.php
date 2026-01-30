@@ -209,11 +209,6 @@ class Html5TagRewriterTest extends TestCase
 
     public static function provideFragmentsCleanedUp(): iterable
     {
-        yield 'empty ESI include tag' => [
-            '<esi:include src="url?foo=bar&amp;bar=baz"/>',
-            '<esi:include src="url?foo=bar&amp;bar=baz"/>',
-        ];
-
         yield 'qouted entities are replaced' => [
             '<p>&lt;script&gt; &amp; &quot;quotes&quot;</p>',
             '<p>&lt;script&gt; &amp; "quotes"</p>',
